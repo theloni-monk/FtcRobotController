@@ -29,12 +29,12 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import android.os.PowerManager;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
 
 /**
@@ -50,14 +50,23 @@ import com.qualcomm.robotcore.util.Range;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="Basic: Linear OpMode", group="Linear Opmode")
-@Disabled
-public class BasicDriveTeleOp extends LinearOpMode {
+@TeleOp(name="Basic: PID test", group="Tests")
+//@Disabled
+public class BasicPIDTest extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor leftDrive = null;
-    private DcMotor rightDrive = null;
+    private DcMotor Motor = null;
+
+    //motor info
+    private double TARGET_RPM = 500;
+    private int ticksPerCycle = 28;
+    private int gearboxCof = 50*40*30;
+
+    //TUNE THESE:
+    private double P = 0.2;
+    private double I = 0.05;
+    private double D = 0.01;
 
     @Override
     public void runOpMode() {
@@ -67,38 +76,62 @@ public class BasicDriveTeleOp extends LinearOpMode {
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
-        leftDrive  = hardwareMap.get(DcMotor.class, "left_drive");
-        rightDrive = hardwareMap.get(DcMotor.class, "right_drive");
+        Motor = hardwareMap.get(DcMotor.class, "left_drive");
+        //rightDrive = hardwareMap.get(DcMotor.class, "right_drive");
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
-        leftDrive.setDirection(DcMotor.Direction.FORWARD);
-        rightDrive.setDirection(DcMotor.Direction.REVERSE);
-
+        Motor.setDirection(DcMotor.Direction.FORWARD);
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
 
+        double outPower = 0.5;
+        double errorIntegral = 0;
+        double prevTime = getRuntime();
+        double prevError = 0;
+
+
+        int locAt1 = 0;
+
+
+        int initialLoc = Motor.getCurrentPosition();
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
-
-            double triggerPower = gamepad1.right_trigger; // master speed on trigger
-            if(gamepad1.b) triggerPower = 0; // press B to stop
-
-            // POV Mode uses left stick to go forward, and right stick to turn.
-            // - This uses basic math to combine motions and is easier to drive straight.
-            double drive = -gamepad1.left_stick_y;
-            double turn  =  gamepad1.left_stick_x;
-            double leftPower    = Range.clip(drive + turn, -1.0, 1.0) ;
-            double rightPower   = Range.clip(drive - turn, -1.0, 1.0) ;
-
             // Send calculated power to wheels
-            leftDrive.setPower(leftPower * triggerPower);
-            rightDrive.setPower(rightPower * triggerPower);
+            double currLoc = (int)(Motor.getCurrentPosition() - initialLoc) % gearboxCof;
+            double targetLoc = (int)((getRuntime()*60) * TARGET_RPM) /gearboxCof % ticksPerCycle;
+            double error = targetLoc - currLoc;
+
+            double pDelta = P * error;
+
+            errorIntegral += error;
+            double iDelta = I * errorIntegral;
+
+            double dDelta = D * (error-prevError) / (runtime.time() - prevTime);
+            prevError = error;
+            prevTime = runtime.time();
+
+            double powerDelta = pDelta + iDelta + dDelta;
+            outPower += powerDelta;
+
+
+            if(runtime.time()>1 && (locAt1<1)) locAt1 = Motor.getCurrentPosition() - initialLoc;
+
+
+            //TEMPad;slfj;lfkjdas;lkfj 2700
+            Motor.setPower(1);
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
+            telemetry.addData("PID data",
+                    "Current Location: " + locAt1 +
+                            "\nLocation Error: " + error +
+                            "\nOutput Power: " + outPower +
+                            "\nProportional Delta: " + pDelta +
+                            "\nIntegral Delta: " + iDelta +
+                            "\nDerivative Delta: " + dDelta +
+                            "\nTotal Power Delta: " + powerDelta );
             telemetry.update();
         }
     }
