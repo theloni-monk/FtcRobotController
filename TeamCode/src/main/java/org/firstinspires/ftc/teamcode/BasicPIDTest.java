@@ -31,9 +31,13 @@ package org.firstinspires.ftc.teamcode;
 
 import android.os.PowerManager;
 
+import com.qualcomm.hardware.lynx.LynxController;
+import com.qualcomm.hardware.lynx.LynxDcMotorController;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorImpl;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
@@ -57,16 +61,8 @@ public class BasicPIDTest extends LinearOpMode {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor Motor = null;
+    private LynxDcMotorController MotorC = null;
 
-    //motor info
-    private double TARGET_RPM = 500;
-    private int ticksPerCycle = 28;
-    private int gearboxCof = 50*40*30;
-
-    //TUNE THESE:
-    private double P = 0.2;
-    private double I = 0.05;
-    private double D = 0.01;
 
     @Override
     public void runOpMode() {
@@ -76,62 +72,25 @@ public class BasicPIDTest extends LinearOpMode {
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
-        Motor = hardwareMap.get(DcMotor.class, "left_drive");
-        //rightDrive = hardwareMap.get(DcMotor.class, "right_drive");
+
+        MotorC = hardwareMap.get(LynxDcMotorController.class, "left_drive");
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
-        Motor.setDirection(DcMotor.Direction.FORWARD);
+        MotorC.setMotorVelocity(MotorC.get); ///FIXME: get motor number from DcMotor
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
 
-        double outPower = 0.5;
-        double errorIntegral = 0;
-        double prevTime = getRuntime();
-        double prevError = 0;
-
-
-        int locAt1 = 0;
-
-
-        int initialLoc = Motor.getCurrentPosition();
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
-            // Send calculated power to wheels
-            double currLoc = (int)(Motor.getCurrentPosition() - initialLoc) % gearboxCof;
-            double targetLoc = (int)((getRuntime()*60) * TARGET_RPM) /gearboxCof % ticksPerCycle;
-            double error = targetLoc - currLoc;
 
-            double pDelta = P * error;
-
-            errorIntegral += error;
-            double iDelta = I * errorIntegral;
-
-            double dDelta = D * (error-prevError) / (runtime.time() - prevTime);
-            prevError = error;
-            prevTime = runtime.time();
-
-            double powerDelta = pDelta + iDelta + dDelta;
-            outPower += powerDelta;
-
-
-            if(runtime.time()>1 && (locAt1<1)) locAt1 = Motor.getCurrentPosition() - initialLoc;
-
-
-            //TEMPad;slfj;lfkjdas;lkfj 2700
-            Motor.setPower(1);
+            Motor.getController().get;
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("PID data",
-                    "Current Location: " + locAt1 +
-                            "\nLocation Error: " + error +
-                            "\nOutput Power: " + outPower +
-                            "\nProportional Delta: " + pDelta +
-                            "\nIntegral Delta: " + iDelta +
-                            "\nDerivative Delta: " + dDelta +
-                            "\nTotal Power Delta: " + powerDelta );
+            telemetry.addData("PID data","\nController name: " + Motor.getController().toString()
+            );
             telemetry.update();
         }
     }
