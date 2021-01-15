@@ -32,6 +32,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorImplEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -44,8 +45,8 @@ public class ShooterTestOp extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor leftDrive = null;
-    private DcMotor rightDrive = null;
+    private DcMotorImplEx leftDrive = null;
+    private DcMotorImplEx rightDrive = null;
 
     private boolean debounced = true;
 
@@ -57,8 +58,8 @@ public class ShooterTestOp extends LinearOpMode {
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
-        leftDrive  = hardwareMap.get(DcMotor.class, "left_drive");
-        rightDrive = hardwareMap.get(DcMotor.class, "right_drive");
+        leftDrive  = (DcMotorImplEx) hardwareMap.get(DcMotor.class, "left_drive");
+        rightDrive = (DcMotorImplEx) hardwareMap.get(DcMotor.class, "right_drive");
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
@@ -96,7 +97,7 @@ public class ShooterTestOp extends LinearOpMode {
             // Send calculated power to wheels
             if(spinMotors) {
                 leftDrive.setPower(powerLevel);
-                rightDrive.setPower(powerLevel);
+                rightDrive.setPower(-powerLevel);
             }
             else{
                 leftDrive.setPower(0);

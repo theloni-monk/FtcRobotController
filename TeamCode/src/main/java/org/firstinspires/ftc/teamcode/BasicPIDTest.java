@@ -29,16 +29,15 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import android.os.PowerManager;
-
 import com.qualcomm.hardware.lynx.LynxController;
 import com.qualcomm.hardware.lynx.LynxDcMotorController;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorImpl;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DcMotorImplEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import java.lang.Math;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 
 /**
@@ -60,9 +59,9 @@ public class BasicPIDTest extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor Motor = null;
-    private LynxDcMotorController MotorC = null;
+    private DcMotorImplEx MotorC = null;
 
+    private final int MOTOR_INDEX = 0; //FIXME: make this more solid
 
     @Override
     public void runOpMode() {
@@ -72,24 +71,20 @@ public class BasicPIDTest extends LinearOpMode {
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
-
-        MotorC = hardwareMap.get(LynxDcMotorController.class, "left_drive");
+        MotorC = (DcMotorImplEx) hardwareMap.get(DcMotor.class,"left_drive");
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
-        MotorC.setMotorVelocity(MotorC.get); ///FIXME: get motor number from DcMotor
+        MotorC.setVelocity( 2 * Math.PI, AngleUnit.RADIANS);
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
-
-            Motor.getController().get;
-
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("PID data","\nController name: " + Motor.getController().toString()
+            telemetry.addData("PID data","\nController name: " + MotorC.getDeviceName()
             );
             telemetry.update();
         }
