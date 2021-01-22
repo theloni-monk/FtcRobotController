@@ -94,6 +94,8 @@ public class TestSensors extends DriveHolo {
 
         imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
 
+
+        rangeSensor = hardwareMap.get(DistanceSensor.class, "sensor_range");
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
