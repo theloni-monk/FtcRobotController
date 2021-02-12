@@ -42,6 +42,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @TeleOp(name="POV EMU HOLO Driving OpMode", group="Linear Opmode")
 //@Disabled
+/**
+ * Emulates POV driving for holonomic drivetrain
+ */
 public class DriveHolo extends LinearOpMode {
 
     // Declare OpMode members.
@@ -51,9 +54,12 @@ public class DriveHolo extends LinearOpMode {
     private DcMotorImplEx l1 = null;
     private DcMotorImplEx l2 = null;
 
-    private final double MAX_RPM = 6000; //free speed rpm
-    private final double GEAR_RATIO = 20; // 20:1 reduction
-    private final double WHEEL_RAD = 0.0375; //meters
+    protected double leftAngVel = 0;
+    protected double rightAngVel = 0;
+
+    public final double MAX_RPM = 6000; //free speed rpm
+    public final double GEAR_RATIO = 20; // 20:1 reduction
+    public final double WHEEL_RAD = 0.0375; //meters
 
     private double MAX_RAD_PER_SEC = MAX_RPM / 60 / GEAR_RATIO * 2 * Math.PI;
     private double MAX_VEL_LIN  = MAX_RAD_PER_SEC * (WHEEL_RAD*WHEEL_RAD) ; //meters/sec  V = w * r^2 get linear vel by taking angular vel (rpm in rads) * r^2
@@ -89,20 +95,20 @@ public class DriveHolo extends LinearOpMode {
         double drive = gamepad1.left_stick_y;
 
 
-        double leftAngVel = Range.clip(triggerSpeed * (drive + turn), -MAX_RAD_PER_SEC, MAX_RAD_PER_SEC);
-        double rightAngVel = Range.clip(triggerSpeed * (drive - turn), -MAX_RAD_PER_SEC, MAX_RAD_PER_SEC);
+        this.leftAngVel = Range.clip(triggerSpeed * (drive + turn), -MAX_RAD_PER_SEC, MAX_RAD_PER_SEC);
+        this.rightAngVel = Range.clip(triggerSpeed * (drive - turn), -MAX_RAD_PER_SEC, MAX_RAD_PER_SEC);
 
         // Send calculated power to wheels
-        l1.setVelocity(leftAngVel, AngleUnit.RADIANS);
-        l2.setVelocity(leftAngVel, AngleUnit.RADIANS);
-        r1.setVelocity(rightAngVel, AngleUnit.RADIANS);
-        r2.setVelocity(rightAngVel, AngleUnit.RADIANS);
+        l1.setVelocity(this.leftAngVel, AngleUnit.RADIANS);
+        l2.setVelocity(this.leftAngVel, AngleUnit.RADIANS);
+        r1.setVelocity(this.rightAngVel, AngleUnit.RADIANS);
+        r2.setVelocity(this.rightAngVel, AngleUnit.RADIANS);
 
 
         telemetry.addData("Instructions", "Left stick y for direction, right stick x for turning, right trigger for master scaling");
         telemetry.addData("Status", "Run Time: " + runtime.toString() + " MotorController: " + r1.getController().toString());
         // Shift speeds to linear speed when reporting
-        telemetry.addData("Motors", "Speeds: left (%.2f)m/s, right (%.2f)m/s", 2 * leftAngVel * (WHEEL_RAD * WHEEL_RAD), 2 * rightAngVel * (WHEEL_RAD * WHEEL_RAD));
+        telemetry.addData("Motors", "Speeds: left (%.2f)m/s, right (%.2f)m/s", 2 * this.leftAngVel * (WHEEL_RAD * WHEEL_RAD), 2 * this.rightAngVel * (WHEEL_RAD * WHEEL_RAD));
         telemetry.update();
     }
 
