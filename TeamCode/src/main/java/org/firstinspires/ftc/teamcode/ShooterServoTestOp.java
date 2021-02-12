@@ -29,39 +29,30 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.lynx.LynxController;
-import com.qualcomm.hardware.lynx.LynxDcMotorController;
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorImplEx;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import java.lang.Math;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import com.qualcomm.robotcore.util.Range;
+
+import java.util.TimerTask;
 
 
-/**
- * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
- * the autonomous or the teleop period of an FTC match. The names of OpModes appear on the menu
- * of the FTC Driver Station. When an selection is made from the menu, the corresponding OpMode
- * class is instantiated on the Robot Controller and executed.
- *
- * This particular OpMode just executes a basic Tank Drive Teleop for a two wheeled robot
- * It includes all the skeletal structure that all linear OpModes contain.
- *
- * Use Android Studios to Copy this Class, and Paste it into your team's code folder with a new name.
- * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
- */
-
-@TeleOp(name="PID test", group="Tests")
+@TeleOp(name="Shooter Servo Test Script", group="Linear Opmode")
 //@Disabled
-public class BasicPIDTest extends LinearOpMode {
+public class ShooterServoTestOp extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotorImplEx MotorC = null;
+    private DcMotor leftDrive = null;
+    private DcMotor rightDrive = null;
+    private ServoImplEx rServo = null;
+    private ServoImplEx lServo = null;
 
-    private final int MOTOR_INDEX = 0; //FIXME: make this more solid
+    private boolean debounced = true;
 
     @Override
     public void runOpMode() {
@@ -71,21 +62,62 @@ public class BasicPIDTest extends LinearOpMode {
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
-        MotorC = (DcMotorImplEx) hardwareMap.get(DcMotor.class,"left_drive1");
+        leftDrive  =  hardwareMap.get(DcMotor.class, "left_drive");
+        rightDrive = hardwareMap.get(DcMotor.class, "right_drive");
+        rServo = (ServoImplEx) hardwareMap.get(Servo.class, "rservo");
+        lServo = (ServoImplEx) hardwareMap.get(Servo.class, "lservo");
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
-        MotorC.setVelocity( 2 * Math.PI, AngleUnit.RADIANS);
+        leftDrive.setDirection(DcMotor.Direction.FORWARD);
+        rightDrive.setDirection(DcMotor.Direction.REVERSE);
+
+        lServo.setDirection(Servo.Direction.FORWARD);
+        rServo.setDirection(Servo.Direction.REVERSE);
+
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
 
+        boolean spinMotors = false;
+
+        double powerLevel = 0.5;
+
+        TimerTask debounce = new TimerTask() {
+            @Override
+            public void run() {
+                debounced = false;
+                sleep(500);
+                debounced = true;
+            }
+        };
+
+
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+
+            if(gamepad1.a) spinMotors = true;
+            if(gamepad1.b) spinMotors = false; // press B to stop
+            if(gamepad1.y && debounced) {powerLevel += 0.1; debounce.run();}
+            if(gamepad1.x && debounced) {powerLevel -= 0.1; debounce.run();}
+
+            powerLevel    = Range.clip(powerLevel, -1.0, 1.0) ;
+
+            // Send calculated power to wheels
+            if(spinMotors) {
+                leftDrive.setPower(powerLevel);
+                rightDrive.setPower(-powerLevel);
+                lServo.setPosition(powerLevel);
+                rServo.setPosition(powerLevel);
+            }
+            else{
+                leftDrive.setPower(0);
+                rightDrive.setPower(0);
+            }
             // Show the elapsed game time and wheel power.
-            telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("PID data","\nController name: " + MotorC.getDeviceName()
-            );
+            telemetry.addData("Instructions", "Press A to enable motors and B to disable, press X to increase power level by 0.1 and Y to decrease by 0.1 " );
+            telemetry.addData("Status", "Run Time: " + runtime.toString() + " MotorController: " + leftDrive.getController().toString());
+            telemetry.addData("Motors", "OutputPower(-1 to 1): " + powerLevel  + " Disabled: " + spinMotors + " Bouncing: " + !debounced);
             telemetry.update();
         }
     }

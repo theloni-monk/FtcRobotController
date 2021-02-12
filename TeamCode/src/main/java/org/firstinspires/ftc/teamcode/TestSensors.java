@@ -70,7 +70,7 @@ public class TestSensors extends DriveHolo {
 
     @Override
     public void runOpMode() {
-        //TEMP initDriveOp();
+        initDriveOp();
 
         // Set up the parameters with which we will use our IMU. Note that integration
         // algorithm here just reports accelerations to the logcat log; it doesn't actually
@@ -102,7 +102,7 @@ public class TestSensors extends DriveHolo {
         // Loop and update the dashboard
         while (opModeIsActive()) {
             telemetry.update();
-            //TEMP executeDriveLogic();
+            executeDriveLogic();
         }
     }
 
@@ -130,6 +130,9 @@ public class TestSensors extends DriveHolo {
                         return imu.getCalibrationStatus().toString();
                     }
                 });
+
+        telemetry.addLine().addData("Motors", "Speeds: left (%.2f)m/s, right (%.2f)m/s", 2 * this.leftAngVel * (WHEEL_RAD * WHEEL_RAD), 2 * this.rightAngVel * (WHEEL_RAD * WHEEL_RAD));
+
 
         telemetry.addLine().addData("position: ", new Func<String>() {
             @Override public String value() {
