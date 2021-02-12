@@ -71,7 +71,7 @@ public class PositionDetectionTest extends DriveHolo {
         // Loop and update the dashboard
         while (opModeIsActive()) {
             telemetry.update();
-            executeDriveLogic();
+            executeControllerDriveLogic();
         }
     }
 

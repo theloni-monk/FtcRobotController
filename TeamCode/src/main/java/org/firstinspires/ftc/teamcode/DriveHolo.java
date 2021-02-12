@@ -57,6 +57,8 @@ public class DriveHolo extends LinearOpMode {
     protected double leftAngVel = 0;
     protected double rightAngVel = 0;
 
+    public double triggerPower;
+
     public final double MAX_RPM = 6000; //free speed rpm
     public final double GEAR_RATIO = 20; // 20:1 reduction
     public final double WHEEL_RAD = 0.0375; //meters
@@ -86,23 +88,40 @@ public class DriveHolo extends LinearOpMode {
         runtime.reset();
     }
 
-    public void executeDriveLogic(){
-        double triggerSpeed = gamepad1.right_trigger * MAX_RAD_PER_SEC; // master speed on trigger
-        if (gamepad1.b) triggerSpeed = 0; // press B to stop
+    public void runLeftMotorVel(double angVel, AngleUnit unit){
+        l1.setVelocity(angVel, unit);
+        l2.setVelocity(angVel, unit);
+    }
+
+    public void runRightMotorVel(double angVel, AngleUnit unit){
+        r1.setVelocity(angVel, unit);
+        r2.setVelocity(angVel, unit);
+    }
+
+    public void runLeftMotorPow(double power){
+        l1.setPower(power);
+        l2.setPower(power);
+    }
+    public void runRightMotorPow(double power){
+        r1.setPower(power);
+        r2.setPower(power);
+    }
+
+    public void executeControllerDriveLogic(){
+        triggerPower = gamepad1.right_trigger * MAX_RAD_PER_SEC; // master speed on trigger
+        if (gamepad1.b) triggerPower = 0; // press B to stop
 
         // POV Mode uses left stick to go forward, and right stick to turn.
         double turn = gamepad1.right_stick_x;
         double drive = gamepad1.left_stick_y;
 
 
-        this.leftAngVel = Range.clip(triggerSpeed * (drive + turn), -MAX_RAD_PER_SEC, MAX_RAD_PER_SEC);
-        this.rightAngVel = Range.clip(triggerSpeed * (drive - turn), -MAX_RAD_PER_SEC, MAX_RAD_PER_SEC);
+        this.leftAngVel = Range.clip(triggerPower * (drive + turn), -MAX_RAD_PER_SEC, MAX_RAD_PER_SEC);
+        this.rightAngVel = Range.clip(triggerPower * (drive - turn), -MAX_RAD_PER_SEC, MAX_RAD_PER_SEC);
 
         // Send calculated power to wheels
-        l1.setVelocity(this.leftAngVel, AngleUnit.RADIANS);
-        l2.setVelocity(this.leftAngVel, AngleUnit.RADIANS);
-        r1.setVelocity(this.rightAngVel, AngleUnit.RADIANS);
-        r2.setVelocity(this.rightAngVel, AngleUnit.RADIANS);
+        runLeftMotorVel(this.leftAngVel, AngleUnit.RADIANS);
+        runRightMotorVel(this.rightAngVel, AngleUnit.RADIANS);
 
 
         telemetry.addData("Instructions", "Left stick y for direction, right stick x for turning, right trigger for master scaling");
@@ -111,6 +130,7 @@ public class DriveHolo extends LinearOpMode {
         telemetry.addData("Motors", "Speeds: left (%.2f)m/s, right (%.2f)m/s", 2 * this.leftAngVel * (WHEEL_RAD * WHEEL_RAD), 2 * this.rightAngVel * (WHEEL_RAD * WHEEL_RAD));
         telemetry.update();
     }
+
 
     @Override
     public void runOpMode() {
@@ -121,7 +141,7 @@ public class DriveHolo extends LinearOpMode {
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
-            executeDriveLogic();
+            executeControllerDriveLogic();
         }
     }
 }

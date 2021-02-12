@@ -48,7 +48,7 @@ public class ShooterTestOp extends LinearOpMode {
     private DcMotor leftDrive = null;
     private DcMotor rightDrive = null;
 
-    private boolean debounced = true;
+    private Boolean debounced = new Boolean(true);
 
     @Override
     public void runOpMode() {
@@ -77,9 +77,11 @@ public class ShooterTestOp extends LinearOpMode {
         TimerTask debounce = new TimerTask() {
             @Override
             public void run() {
-                debounced = false;
-                sleep(500);
-                debounced = true;
+                synchronized (debounced){
+                    debounced = false;
+                    sleep(500);
+                    debounced = true;
+                }
             }
         };
 
