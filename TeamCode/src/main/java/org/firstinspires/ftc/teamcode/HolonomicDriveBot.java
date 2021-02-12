@@ -38,6 +38,7 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
+import java.util.TimerTask;
 
 
 @TeleOp(name="POV EMU HOLO Driving OpMode", group="Linear Opmode")
@@ -45,7 +46,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 /**
  * Emulates POV driving for holonomic drivetrain
  */
-public class DriveHolo extends LinearOpMode {
+public class HolonomicDriveBot extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
@@ -65,6 +66,20 @@ public class DriveHolo extends LinearOpMode {
 
     private double MAX_RAD_PER_SEC = MAX_RPM / 60 / GEAR_RATIO * 2 * Math.PI;
     private double MAX_VEL_LIN  = MAX_RAD_PER_SEC * (WHEEL_RAD*WHEEL_RAD) ; //meters/sec  V = w * r^2 get linear vel by taking angular vel (rpm in rads) * r^2
+
+
+    protected Boolean debounced = new Boolean(true);
+
+    TimerTask debounce = new TimerTask() {
+        @Override
+        public void run() {
+            synchronized (debounced){
+                debounced = false;
+                sleep(500);
+                debounced = true;
+            }
+        }
+    };
 
     public void initDriveOp(){
         telemetry.addData("Status", "Initialized");

@@ -29,15 +29,13 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.lynx.LynxController;
-import com.qualcomm.hardware.lynx.LynxDcMotorController;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorImplEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import java.lang.Math;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import com.qualcomm.robotcore.util.Range;
 
 
 /**
@@ -53,16 +51,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="PID test", group="Tests")
+@TeleOp(name="POV Driving OpMode", group="Linear Opmode")
 //@Disabled
-public class BasicPIDTest extends LinearOpMode {
+public class POVDriveBot extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotorImplEx MotorC = null;
-
-    private final int MOTOR_INDEX = 0; //FIXME: make this more solid
-
+    private DcMotorImplEx leftDrive = null;
+    private DcMotorImplEx rightDrive = null;
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
@@ -71,21 +67,38 @@ public class BasicPIDTest extends LinearOpMode {
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
-        MotorC = (DcMotorImplEx) hardwareMap.get(DcMotor.class,"left_drive1");
+        leftDrive  = (DcMotorImplEx) hardwareMap.get(DcMotor.class, "left_drive");
+        rightDrive = (DcMotorImplEx) hardwareMap.get(DcMotor.class, "right_drive");
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
-        MotorC.setVelocity( 2 * Math.PI, AngleUnit.RADIANS);
+        leftDrive.setDirection(DcMotor.Direction.FORWARD);
+        rightDrive.setDirection(DcMotor.Direction.REVERSE);
+
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+
+            double triggerPower = gamepad1.right_trigger; // master speed on trigger
+            if(gamepad1.b) triggerPower = 0; // press B to stop
+
+            // POV Mode uses left stick to go forward, and right stick to turn.
+            // - This uses basic math to combine motions and is easier to drive straight.
+            double drive = -gamepad1.left_stick_y;
+            double turn  =  gamepad1.left_stick_x;
+            double leftPower    = Range.clip(drive + turn, -1.0, 1.0) ;
+            double rightPower   = Range.clip(drive - turn, -1.0, 1.0) ;
+
+            // Send calculated power to wheels
+            leftDrive.setPower(leftPower * triggerPower);
+            rightDrive.setPower(rightPower * triggerPower);
+
             // Show the elapsed game time and wheel power.
-            telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("PID data","\nController name: " + MotorC.getDeviceName()
-            );
+            telemetry.addData("Status", "Run Time: " + runtime.toString() + " MotorController: " + leftDrive.getController().toString());
+            telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
             telemetry.update();
         }
     }

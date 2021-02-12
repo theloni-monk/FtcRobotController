@@ -7,26 +7,13 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
-import java.util.TimerTask;
-
 @TeleOp(name="Angle PID", group="Linear Opmode")
-public class AnglePID extends PositionDetectionTest{
+public class AnglePID extends PositionTrackerBot {
 
     PIDController pidRotate;
     Orientation lastAngles = new Orientation();
-    double globalAngle, power = .30, correction, rotation;
-    private Boolean debounced = new Boolean(true);
+    double globalAngle, rotation;
 
-    TimerTask debounce = new TimerTask() {
-        @Override
-        public void run() {
-            synchronized (debounced){
-                debounced = false;
-                sleep(500);
-                debounced = true;
-            }
-        }
-    };
 
     @Override
     public void runOpMode() {

@@ -40,7 +40,6 @@ import com.qualcomm.robotcore.util.Range;
 
 import java.util.TimerTask;
 
-
 @TeleOp(name="Shooter Servo Test Script", group="Linear Opmode")
 //@Disabled
 public class ShooterServoTestOp extends LinearOpMode {
