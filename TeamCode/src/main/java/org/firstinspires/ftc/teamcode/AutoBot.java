@@ -25,6 +25,12 @@ public class AutoBot extends PositionTrackerBot {
         distanceDrivePID = new PIDController(0.05,0,0);//TODO: tune
     }
 
+    public void initAutoBot(){
+        initDriveOp();
+        initTracking();
+        initPIDs();
+    }
+
     /**
      * moves the robot a specified distance in the y direction TODO: arbitrary dir vect
      * @param dist
@@ -68,7 +74,7 @@ public class AutoBot extends PositionTrackerBot {
      * Rotate left or right the number of degrees. Does not support turning more than 359 degrees.
      * @param degrees Degrees to turn, + is left - is right
      */
-    private void rotate(int degrees, double power) {
+    protected void rotate(int degrees, double power) {
         // restart imu angle tracking.
         resetAngle();
 
