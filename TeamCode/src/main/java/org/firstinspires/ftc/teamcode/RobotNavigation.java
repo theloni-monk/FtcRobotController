@@ -25,7 +25,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.NavUtil.plus;
 public class RobotNavigation {
     BNO055IMU imu;
     public SmartIntegrator integrator;
-    protected ExecutorService navManager;
+    public ExecutorService navManager;
 
     /**
      * @param bno: must be already initialized
@@ -106,25 +106,25 @@ public class RobotNavigation {
             if (frontDist < maxDistRange) {
                 //141inch long field
                 if (withinEpsilon(theta, 0)) {
-                    this.position.y = frontDist / 1000;
+                    this.position.y = 3.5814 - (frontDist / 1000);
                 }
                 if (withinEpsilon(theta, 180) || withinEpsilon(theta, -180)) {
-                    this.position.y = 3.5814 - (frontDist / 1000);
+                    this.position.y = frontDist / 1000;
                 }
             }
             if (sideDist < maxDistRange) {
                 if (withinEpsilon(theta, 0)) {
-                    this.position.x = sideDist / 1000;
+                    this.position.x = 3.5814 - (sideDist / 1000);
                 }
                 if (withinEpsilon(theta, 180) || withinEpsilon(theta, -180)) {
-                    this.position.x = 3.5814 - (sideDist / 1000);
+                    this.position.x = sideDist / 1000;
                 }
             }
 
-            if (timeDelta < 10) { //update vel from pos derivative if delta t is dt
-                this.velocity.xVeloc = (this.position.x - prevPos.x) / (timeDelta / 1000);
-                this.velocity.yVeloc = (this.position.y - prevPos.y) / (timeDelta / 1000);
-            }
+//            if (timeDelta < 10) { //update vel from pos derivative if delta t is dt
+//                this.velocity.xVeloc = (this.position.x - prevPos.x) / (timeDelta / 1000);
+//                this.velocity.yVeloc = (this.position.y - prevPos.y) / (timeDelta / 1000);
+//            }
 
             return;
         }
@@ -149,6 +149,7 @@ public class RobotNavigation {
             this.acceleration = null;
         }
 
+        //TODO: use encoders
         public void update(Acceleration linearAcceleration) {
             //Naive integration
             if (linearAcceleration.acquisitionTime != 0L) {
@@ -185,6 +186,7 @@ public class RobotNavigation {
     class NavManager implements Runnable {
         protected final int msPollInterval;
         protected static final long nsPerMs = 1000000L;
+        int correctionCounter = 0;
 
         NavManager(int msPollInterval) {
             this.msPollInterval = msPollInterval;
@@ -192,7 +194,7 @@ public class RobotNavigation {
 
         public void run() {
             try {
-                int correctionCounter = 0;
+
                 while(!Thread.currentThread().isInterrupted()) {
                     //correct from range sensors every 5 update cycles bc acc = 100hz, range = 20hz
                     correctionCounter += 1;

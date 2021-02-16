@@ -22,7 +22,7 @@ public class AutoBot extends PositionTrackerBot {
     protected void initPIDs(){
         pidRotate = new PIDController(.003, .00003, 0);
         straightDrivePID = new PIDController(.05, 0, 0);
-        distanceDrivePID = new PIDController(0.05,0,0);//TODO: tune
+        distanceDrivePID = new PIDController(0.5,0,0.1);//TODO: tune
     }
 
     public void initAutoBot(){
@@ -36,7 +36,21 @@ public class AutoBot extends PositionTrackerBot {
      * @param dist
      * @param unit
      */
-    protected void driveDist(double dist, DistanceUnit unit){
+    protected void driveDist(double dist, DistanceUnit unit) {
+
+//        if (dist > 0) {
+//            runLeftMotorPow(1);
+//            runRightMotorPow(1);
+//            sleep((long) ((dist / 1.23) * 1000));
+//        } else {
+////            runLeftMotorPow(-1);
+////            runRightMotorPow(-1);
+////            sleep((long) ((-dist / 1.23) * 1000));
+//            rotate(180, 1);
+//            driveDist(-dist, unit);
+//        }
+//        return;
+
         double initLoc = this.rNav.getPosition().toUnit(unit).y;
 
         straightDrivePID.setSetpoint(0);
@@ -47,9 +61,9 @@ public class AutoBot extends PositionTrackerBot {
         // Use PID with position integrator to drive a distance
         distanceDrivePID.reset();
         distanceDrivePID.setSetpoint(initLoc + dist);
-        distanceDrivePID.setInputRange(0, initLoc + dist + 0.5);
-        distanceDrivePID.setOutputRange(0, 1);
-        distanceDrivePID.setTolerance(1);
+        distanceDrivePID.setInputRange(initLoc, initLoc + dist + 0.25);
+        distanceDrivePID.setOutputRange(-1, 1);
+        distanceDrivePID.setTolerance(5);
         distanceDrivePID.enable();
 
 
@@ -63,6 +77,8 @@ public class AutoBot extends PositionTrackerBot {
             // set power levels.
             runLeftMotorPow(distanceCorrection - angleCorrection);
             runRightMotorPow(distanceCorrection + angleCorrection);
+
+            telemetry.update();
         } while (opModeIsActive() && !distanceDrivePID.onTarget());
 
         // brake at end
@@ -70,7 +86,7 @@ public class AutoBot extends PositionTrackerBot {
         runRightMotorPow(0);
     }
 
-    /**
+        /**
      * Rotate left or right the number of degrees. Does not support turning more than 359 degrees.
      * @param degrees Degrees to turn, + is left - is right
      */
@@ -117,6 +133,7 @@ public class AutoBot extends PositionTrackerBot {
                 power = pidRotate.performPID(getAngle()); // power will be - on right turn.
                 runLeftMotorPow(-power);
                 runRightMotorPow(power);
+                telemetry.update();
             } while (opModeIsActive() && !pidRotate.onTarget());
         }
         else    // left turn.
@@ -125,6 +142,7 @@ public class AutoBot extends PositionTrackerBot {
                 power = pidRotate.performPID(getAngle()); // power will be + on left turn.
                 runLeftMotorPow(-power);
                 runRightMotorPow(power);
+                telemetry.update();
             } while (opModeIsActive() && !pidRotate.onTarget());
 
         // turn the motors off.
