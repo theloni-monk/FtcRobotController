@@ -29,7 +29,6 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -46,9 +45,8 @@ public class ShooterServoTestOp extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor leftDrive = null;
-    private DcMotor rightDrive = null;
-    private ServoImplEx rServo = null;
+    private DcMotor lShooter = null;
+    private DcMotor rShooter = null;
     private ServoImplEx lServo = null;
 
     private boolean debounced = true;
@@ -61,18 +59,16 @@ public class ShooterServoTestOp extends LinearOpMode {
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
-        leftDrive  =  hardwareMap.get(DcMotor.class, "left_drive");
-        rightDrive = hardwareMap.get(DcMotor.class, "right_drive");
-        rServo = (ServoImplEx) hardwareMap.get(Servo.class, "rservo");
-        lServo = (ServoImplEx) hardwareMap.get(Servo.class, "lservo");
+        lShooter =  hardwareMap.get(DcMotor.class, "shoot_left");
+        rShooter = hardwareMap.get(DcMotor.class, "shoot_right");
+        lServo = (ServoImplEx) hardwareMap.get(Servo.class, "shoot_servo");
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
-        leftDrive.setDirection(DcMotor.Direction.FORWARD);
-        rightDrive.setDirection(DcMotor.Direction.REVERSE);
+        lShooter.setDirection(DcMotor.Direction.FORWARD);
+        rShooter.setDirection(DcMotor.Direction.REVERSE);
 
         lServo.setDirection(Servo.Direction.FORWARD);
-        rServo.setDirection(Servo.Direction.REVERSE);
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
@@ -104,18 +100,17 @@ public class ShooterServoTestOp extends LinearOpMode {
 
             // Send calculated power to wheels
             if(spinMotors) {
-                leftDrive.setPower(powerLevel);
-                rightDrive.setPower(-powerLevel);
+                lShooter.setPower(powerLevel);
+                rShooter.setPower(-powerLevel);
                 lServo.setPosition(powerLevel);
-                rServo.setPosition(powerLevel);
             }
             else{
-                leftDrive.setPower(0);
-                rightDrive.setPower(0);
+                lShooter.setPower(0);
+                rShooter.setPower(0);
             }
             // Show the elapsed game time and wheel power.
             telemetry.addData("Instructions", "Press A to enable motors and B to disable, press X to increase power level by 0.1 and Y to decrease by 0.1 " );
-            telemetry.addData("Status", "Run Time: " + runtime.toString() + " MotorController: " + leftDrive.getController().toString());
+            telemetry.addData("Status", "Run Time: " + runtime.toString() + " MotorController: " + lShooter.getController().toString());
             telemetry.addData("Motors", "OutputPower(-1 to 1): " + powerLevel  + " Disabled: " + spinMotors + " Bouncing: " + !debounced);
             telemetry.update();
         }
