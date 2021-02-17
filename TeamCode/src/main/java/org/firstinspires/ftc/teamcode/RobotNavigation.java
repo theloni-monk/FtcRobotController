@@ -78,7 +78,7 @@ public class RobotNavigation {
         final double maxDistRange = 65535; //millimeters
         private DistanceSensor sideRange;
         private DistanceSensor frontRange;
-
+        //FIXME: use motor params and use encoders to estimate pos
         SmartIntegrator(DistanceSensor fRange, DistanceSensor sRange) {
             date = new Date();
             frontRange = fRange;
@@ -106,18 +106,18 @@ public class RobotNavigation {
             if (frontDist < maxDistRange) {
                 //141inch long field
                 if (withinEpsilon(theta, 0)) {
-                    this.position.y = 3.5814 - (frontDist / 1000);
+                    this.position.y = 3581.4 - (frontDist );
                 }
                 if (withinEpsilon(theta, 180) || withinEpsilon(theta, -180)) {
-                    this.position.y = frontDist / 1000;
+                    this.position.y = frontDist ;
                 }
             }
             if (sideDist < maxDistRange) {
                 if (withinEpsilon(theta, 0)) {
-                    this.position.x = 3.5814 - (sideDist / 1000);
+                    this.position.x = 3581.4 - (sideDist );
                 }
                 if (withinEpsilon(theta, 180) || withinEpsilon(theta, -180)) {
-                    this.position.x = sideDist / 1000;
+                    this.position.x = sideDist ;
                 }
             }
 
@@ -168,7 +168,7 @@ public class RobotNavigation {
                     }
 
                     if (this.parameters != null && this.parameters.loggingEnabled) {
-                        RobotLog.vv(this.parameters.loggingTag, "dt=%.3fs accel=%s vel=%s pos=%s", new Object[]{(double) (this.acceleration.acquisitionTime - accelPrev.acquisitionTime) * 1.0E-9D, this.acceleration, this.velocity, this.position});
+                        RobotLog.vv(this.parameters.loggingTag, "dt=%.3fs accel=%s vel=%s pos=%s", (double) (this.acceleration.acquisitionTime - accelPrev.acquisitionTime) * 1.0E-9D, this.acceleration, this.velocity, this.position);
                     }
                 } else {
                     this.acceleration = linearAcceleration;

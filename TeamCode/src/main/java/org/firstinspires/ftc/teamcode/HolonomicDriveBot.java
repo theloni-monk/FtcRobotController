@@ -36,6 +36,8 @@ import com.qualcomm.robotcore.hardware.DcMotorImplEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import net.frogbots.ftcopmodetunercommon.opmode.TunableLinearOpMode;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 import java.util.TimerTask;
@@ -46,7 +48,7 @@ import java.util.TimerTask;
 /**
  * Emulates POV driving for holonomic drivetrain
  */
-public class HolonomicDriveBot extends LinearOpMode {
+public class HolonomicDriveBot extends TunableLinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
@@ -64,11 +66,11 @@ public class HolonomicDriveBot extends LinearOpMode {
     public final double GEAR_RATIO = 20; // 20:1 reduction
     public final double WHEEL_RAD = 0.0375; //meters
 
-    private double MAX_RAD_PER_SEC = MAX_RPM / 60 / GEAR_RATIO * 2 * Math.PI;
-    private double MAX_VEL_LIN  = MAX_RAD_PER_SEC * (WHEEL_RAD*WHEEL_RAD) ; //meters/sec  V = w * r^2 get linear vel by taking angular vel (rpm in rads) * r^2
+    private final double MAX_RAD_PER_SEC = MAX_RPM / 60 / GEAR_RATIO * 2 * Math.PI;
+    private final double MAX_VEL_LIN  = MAX_RAD_PER_SEC * (WHEEL_RAD*WHEEL_RAD) ; //meters/sec  V = w * r^2 get linear vel by taking angular vel (rpm in rads) * r^2
 
 
-    protected Boolean debounced = new Boolean(true);
+    protected Boolean debounced = Boolean.TRUE;
 
     TimerTask debounce = new TimerTask() {
         @Override

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
@@ -22,13 +23,23 @@ public class AutoBot extends PositionTrackerBot {
     protected void initPIDs(){
         pidRotate = new PIDController(.003, .00003, 0);
         straightDrivePID = new PIDController(.05, 0, 0);
-        distanceDrivePID = new PIDController(0.5,0,0.1);//TODO: tune
+        distanceDrivePID = new PIDController(getDouble("P"),getDouble("I"),getDouble("D"));//TODO: tune
     }
 
     public void initAutoBot(){
         initDriveOp();
         initTracking();
         initPIDs();
+    }
+
+    @Override
+    void composeTelemetry() {
+        super.composeTelemetry();
+        telemetry.addLine().addData("PID Vals",new Func<String>() {
+            @Override public String value() {
+                return "P: %s, I: %s, D: %s".format(String.valueOf(getDouble("P")),String.valueOf(getDouble("I")),String.valueOf(getDouble("D")));
+            }
+        });
     }
 
     /**
@@ -60,6 +71,7 @@ public class AutoBot extends PositionTrackerBot {
 
         // Use PID with position integrator to drive a distance
         distanceDrivePID.reset();
+        distanceDrivePID.setPID(getDouble("P"),getDouble("I"),getDouble("D"));
         distanceDrivePID.setSetpoint(initLoc + dist);
         distanceDrivePID.setInputRange(initLoc, initLoc + dist + 0.25);
         distanceDrivePID.setOutputRange(-1, 1);
@@ -86,7 +98,7 @@ public class AutoBot extends PositionTrackerBot {
         runRightMotorPow(0);
     }
 
-        /**
+    /**
      * Rotate left or right the number of degrees. Does not support turning more than 359 degrees.
      * @param degrees Degrees to turn, + is left - is right
      */

@@ -84,23 +84,23 @@ public class PositionTrackerBot extends HolonomicDriveBot {
             // to do that in each of the three items that need that info, as that's
             // three times the necessary expense.
             angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            gravity  = imu.getGravity();
+            //gravity  = imu.getGravity();
         }
         });
 
-        telemetry.addLine()
-                .addData("status: ", new Func<String>() {
-                    @Override public String value() {
-                        return imu.getSystemStatus().toShortString();
-                    }
-                })
-                .addData("calib: ", new Func<String>() {
-                    @Override public String value() {
-                        return imu.getCalibrationStatus().toString();
-                    }
-                });
+//        telemetry.addLine()
+//                .addData("status: ", new Func<String>() {
+//                    @Override public String value() {
+//                        return imu.getSystemStatus().toShortString();
+//                    }
+//                })
+//                .addData("calib: ", new Func<String>() {
+//                    @Override public String value() {
+//                        return imu.getCalibrationStatus().toString();
+//                    }
+//                });
 
-        telemetry.addLine().addData("Motors", "Speeds: left (%.2f)m/s, right (%.2f)m/s", 2 * this.leftAngVel * (WHEEL_RAD * WHEEL_RAD), 2 * this.rightAngVel * (WHEEL_RAD * WHEEL_RAD));
+        //telemetry.addLine().addData("Motors", "Speeds: left (%.2f)m/s, right (%.2f)m/s", 2 * this.leftAngVel * (WHEEL_RAD * WHEEL_RAD), 2 * this.rightAngVel * (WHEEL_RAD * WHEEL_RAD));
         telemetry.addLine().addData("position: ", new Func<String>() {
             @Override public String value() {
                 return rNav.getPosition().toString();
@@ -125,8 +125,8 @@ public class PositionTrackerBot extends HolonomicDriveBot {
 
         telemetry.addLine().addData("Range Sensors: ", new Func<String>() {
             @Override public String value() {
-                return "front range sensor: " + Double.toString(frontRangeSensor.getDistance(DistanceUnit.METER))
-                        + " side range sensor: " + Double.toString(sideRangeSensor.getDistance(DistanceUnit.METER));
+                return "front range sensor: " + Double.toString(frontRangeSensor.getDistance(DistanceUnit.MM))
+                        + " side range sensor: " + Double.toString(sideRangeSensor.getDistance(DistanceUnit.MM));
             }
         });
     }
