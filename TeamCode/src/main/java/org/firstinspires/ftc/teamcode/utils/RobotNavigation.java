@@ -1,20 +1,14 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.utils;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.bosch.BNO055IMUImpl;
 import com.qualcomm.robotcore.hardware.DcMotorImplEx;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
-import com.qualcomm.robotcore.robot.Robot;
-import com.qualcomm.robotcore.util.RobotLog;
 import com.qualcomm.robotcore.util.ThreadPool;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.NavUtil;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
@@ -25,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.ZYX;
 import static org.firstinspires.ftc.robotcore.external.navigation.NavUtil.plus;
+import static org.firstinspires.ftc.robotcore.external.navigation.NavUtil.scale;
 
 //TODO make actually smart with kalman filter
 public class RobotNavigation {
@@ -36,7 +31,7 @@ public class RobotNavigation {
      * @param bno: must be already initialized
      * @param smartIntegrator
      */
-    RobotNavigation(BNO055IMU bno, SmartIntegrator smartIntegrator){
+    public RobotNavigation(BNO055IMU bno, SmartIntegrator smartIntegrator){
         this.imu = bno;
         this.integrator = smartIntegrator;
         this.navManager = ThreadPool.newSingleThreadExecutor("imu integration");
@@ -71,6 +66,10 @@ public class RobotNavigation {
             }
     }
 
+    public SmartIntegrator makeIntegrator(DcMotorImplEx lDrive, DcMotorImplEx rDrive, double counts_per_motor_rev){
+        return new SmartIntegrator(lDrive,rDrive,counts_per_motor_rev);
+    }
+
     class SmartIntegrator implements BNO055IMU.AccelerationIntegrator {
         BNO055IMU.Parameters parameters = null;
         Position position = new Position();
@@ -89,6 +88,7 @@ public class RobotNavigation {
         //private DistanceSensor sideRange;
         //private DistanceSensor frontRange;
         double COUNTS_PER_MOTOR_REV;
+        final double imuWeight = 0.05;
 
         //FIXME: use motor params and use encoders to estimate pos
         SmartIntegrator(DcMotorImplEx lDrive, DcMotorImplEx rDrive, double counts_per_motor_rev) {
@@ -160,7 +160,6 @@ public class RobotNavigation {
             this.acceleration = null;
         }
 
-        //TODO: use encoders
         public void update(Acceleration linearAcceleration) {
             //Naive integration
             int lCount = lDrive.getCurrentPosition();
@@ -172,9 +171,8 @@ public class RobotNavigation {
             rDrivePrevCount = rCount;
 
             double meanDiffMM = (rDiff*COUNTS_PER_MOTOR_REV + (lDiff * COUNTS_PER_MOTOR_REV))/2;
-            //TODO: improve maybe and test
             double xyAngle = RobotNavigation.this.imu.getAngularOrientation(AxesReference.INTRINSIC, ZYX, AngleUnit.RADIANS).firstAngle;
-            double diffAngle = Math.atan() //angle of normal to vector between yldiff and yrdiff;
+            //double diffAngle = Math.atan() //TODO: WRITEME: angle of normal to vector between yldiff and yrdiff;
             double newXDelta = Math.cos(xyAngle) * meanDiffMM;
             double newYDelta = Math.sin(xyAngle) * meanDiffMM;
             Position encoderCorrection = new Position(DistanceUnit.MM, newXDelta, newYDelta, this.position.z, 0);
@@ -187,7 +185,7 @@ public class RobotNavigation {
                     this.acceleration = linearAcceleration;
                     if (accelPrev.acquisitionTime != 0L) {
                         Velocity deltaVelocity = NavUtil.meanIntegrate(this.acceleration, accelPrev);
-                        this.velocity = plus(this.velocity, deltaVelocity);
+                        this.velocity = NavUtil.plus(this.velocity, deltaVelocity);
                     }
                     if (velocityPrev.acquisitionTime != 0L) {
                         imuCorrection = NavUtil.meanIntegrate(this.velocity, velocityPrev);
@@ -198,8 +196,8 @@ public class RobotNavigation {
                 }
             }
             //get new correction from weighted avg
-
-            this.position = plus(this.position);
+            Position posDelta = plus(scale(encoderCorrection, 1 - imuWeight),scale(imuCorrection, imuWeight));
+            this.position = NavUtil.plus(this.position, posDelta);
         }
 
 
@@ -212,7 +210,6 @@ public class RobotNavigation {
     class NavManager implements Runnable {
         protected final int msPollInterval;
         protected static final long nsPerMs = 1000000L;
-        int correctionCounter = 0;
 
         NavManager(int msPollInterval) {
             this.msPollInterval = msPollInterval;
@@ -228,7 +225,7 @@ public class RobotNavigation {
 
 
                     if (this.msPollInterval > 0) {
-                        long msSoFar = (System.nanoTime() - linearAcceleration.acquisitionTime) / 1000000L;
+                        long msSoFar = (System.nanoTime() - linearAcceleration.acquisitionTime) / nsPerMs;
                         long msReadFudge = 5L;
                         Thread.sleep(Math.max(0L, (long)this.msPollInterval - msSoFar - msReadFudge));
                     } else {
