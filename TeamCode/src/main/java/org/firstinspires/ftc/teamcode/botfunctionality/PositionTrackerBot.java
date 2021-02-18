@@ -19,7 +19,6 @@ import org.firstinspires.ftc.teamcode.utils.RobotNavigation;
 
 import java.util.Locale;
 
-@TeleOp(name="Position Detection Test", group="Linear Opmode")
 abstract public class PositionTrackerBot extends HolonomicDriveBot {
     // The IMU sensor object
     protected BNO055IMU imu;

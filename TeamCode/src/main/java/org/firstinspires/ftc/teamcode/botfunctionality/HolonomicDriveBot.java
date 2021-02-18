@@ -43,8 +43,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import java.util.TimerTask;
 
 
-@TeleOp(name="POV EMU HOLO Driving OpMode", group="Linear Opmode")
-//@Disabled
+
 /**
  * Emulates POV driving for holonomic drivetrain
  */

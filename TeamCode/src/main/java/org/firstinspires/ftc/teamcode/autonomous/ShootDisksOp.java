@@ -21,7 +21,7 @@ public class ShootDisksOp extends AutoBot {
         composeTelemetry();
         waitForStart();
         while(opModeIsActive() && runOnce){
-            executeDeliveryScript();
+            //executeDeliveryScript();
             executeShootScript();
             runOnce = false;
         }

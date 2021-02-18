@@ -39,7 +39,7 @@ import com.qualcomm.robotcore.util.Range;
 import java.util.TimerTask;
 
 
-@TeleOp(name="Shooter Test Script", group="Linear Opmode")
+@TeleOp(name="Shooter Test Script - kitbot config", group="Linear Opmode")
 //@Disabled
 public class ShooterTestOp extends LinearOpMode {
 
