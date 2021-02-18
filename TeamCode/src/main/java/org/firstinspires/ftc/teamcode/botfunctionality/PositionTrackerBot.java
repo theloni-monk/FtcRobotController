@@ -4,6 +4,7 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.BNO055IMUImpl;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.robot.Robot;
 
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
@@ -55,8 +56,8 @@ abstract public class PositionTrackerBot extends HolonomicDriveBot {
 
         frontRangeSensor = hardwareMap.get(DistanceSensor.class, "range_front");
         sideRangeSensor = hardwareMap.get(DistanceSensor.class, "range_side");
-
-        rNav = new RobotNavigation(imu, rNav.makeIntegrator(l1,r1,COUNTS_PER_MOTOR_REV));
+        RobotNavigation dummyNav = new RobotNavigation();
+        rNav = new RobotNavigation(imu, dummyNav.makeIntegrator(l1,r1,COUNTS_PER_MOTOR_REV));
         rNav.startTracking(200, parameters, new Position(), new Velocity()); // start is origin, 5hz update just for testing
 
     }

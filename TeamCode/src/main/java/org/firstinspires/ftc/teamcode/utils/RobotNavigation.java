@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.utils;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotorImplEx;
+import com.qualcomm.robotcore.robot.Robot;
 import com.qualcomm.robotcore.util.ThreadPool;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
@@ -35,6 +36,9 @@ public class RobotNavigation {
         this.imu = bno;
         this.integrator = smartIntegrator;
         this.navManager = ThreadPool.newSingleThreadExecutor("imu integration");
+    }
+    public RobotNavigation(){
+
     }
 
     public Position getPosition() {
