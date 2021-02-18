@@ -1,13 +1,12 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-
-import java.lang.reflect.Member;
+import org.firstinspires.ftc.teamcode.botfunctionality.AutoBot;
 
 @Autonomous(name = "Wobble Delivery", group = "Linear Opmode")
-public class DeliverWobbleOp extends AutoBot{
+public class DeliverWobbleOp extends AutoBot {
     @Override
     public void runOpMode(){
         boolean runOnce = true;

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.botfunctionality;
 
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -6,9 +6,10 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.teamcode.botfunctionality.PositionTrackerBot;
 import org.firstinspires.ftc.teamcode.utils.PIDController;
 
-public class AutoBot extends PositionTrackerBot {
+abstract public class AutoBot extends PositionTrackerBot {
     PIDController straightDrivePID;
     PIDController distanceDrivePID;
     PIDController pidRotate;
@@ -19,7 +20,7 @@ public class AutoBot extends PositionTrackerBot {
     /**
      * Extend this class to access pid rotation and distance movement
      */
-    AutoBot(){}
+    public AutoBot(){}
 
     protected void initPIDs(){
         pidRotate = new PIDController(.003, .00003, 0);
@@ -34,7 +35,7 @@ public class AutoBot extends PositionTrackerBot {
     }
 
     @Override
-    void composeTelemetry() {
+    protected void composeTelemetry() {
         super.composeTelemetry();
         telemetry.addLine().addData("PID Vals",new Func<String>() {
             @Override public String value() {

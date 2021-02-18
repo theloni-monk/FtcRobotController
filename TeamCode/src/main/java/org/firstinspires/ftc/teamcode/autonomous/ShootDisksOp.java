@@ -1,17 +1,15 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
-import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-
-import java.util.TimerTask;
+import org.firstinspires.ftc.teamcode.botfunctionality.AutoBot;
 
 @Autonomous(name = "Shoot disks", group = "Linear Opmode")
-public class ShootDisksOp extends AutoBot{
+public class ShootDisksOp extends AutoBot {
     private DcMotor lShooter = null;
     private DcMotor rShooter = null;
     private ServoImplEx rServo = null;

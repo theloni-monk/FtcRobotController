@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.botfunctionality;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.BNO055IMUImpl;
@@ -14,14 +14,15 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
+import org.firstinspires.ftc.teamcode.botfunctionality.HolonomicDriveBot;
 import org.firstinspires.ftc.teamcode.utils.RobotNavigation;
 
 import java.util.Locale;
 
 @TeleOp(name="Position Detection Test", group="Linear Opmode")
-public class PositionTrackerBot extends HolonomicDriveBot {
+abstract public class PositionTrackerBot extends HolonomicDriveBot {
     // The IMU sensor object
-    BNO055IMUImpl imu;
+    protected BNO055IMU imu;
 
     private DistanceSensor frontRangeSensor;
     private DistanceSensor sideRangeSensor;
@@ -31,6 +32,8 @@ public class PositionTrackerBot extends HolonomicDriveBot {
     // State used for updating telemetry
     Orientation angles;
     Acceleration gravity;
+
+    public PositionTrackerBot(){}
 
     public void initTracking(){
         // Set up the parameters with which we will use our IMU. Note that integration
@@ -59,23 +62,7 @@ public class PositionTrackerBot extends HolonomicDriveBot {
 
     }
 
-    @Override
-    public void runOpMode() {
-        initDriveOp();
-        initTracking();
-
-        // Set up our telemetry dashboard
-        composeTelemetry();
-        // Wait for the game to start (driver presses PLAY)
-        waitForStart();
-        // Loop and update the dashboard
-        while (opModeIsActive()) {
-            telemetry.update();
-            executeControllerDriveLogic();
-        }
-    }
-
-    void composeTelemetry() {
+    protected void composeTelemetry() {
         // At the beginning of each telemetry update, grab a bunch of data
         // from the IMU that we will then display in separate lines.
         telemetry.addAction(new Runnable() { @Override public void run()

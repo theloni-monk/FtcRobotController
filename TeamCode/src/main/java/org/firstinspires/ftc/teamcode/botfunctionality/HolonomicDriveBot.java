@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.botfunctionality;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -48,7 +48,7 @@ import java.util.TimerTask;
 /**
  * Emulates POV driving for holonomic drivetrain
  */
-public class HolonomicDriveBot extends TunableLinearOpMode {
+abstract public class HolonomicDriveBot extends TunableLinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
@@ -74,9 +74,9 @@ public class HolonomicDriveBot extends TunableLinearOpMode {
     private final double MAX_VEL_LIN  = MAX_RAD_PER_SEC * (WHEEL_RAD*WHEEL_RAD) ; //meters/sec  V = w * r^2 get linear vel by taking angular vel (rpm in rads) * r^2
 
 
-    protected Boolean debounced = Boolean.TRUE;
+    public Boolean debounced = Boolean.TRUE;
 
-    TimerTask debounce = new TimerTask() {
+    public TimerTask debounce = new TimerTask() {
         @Override
         public void run() {
             synchronized (debounced){
@@ -86,6 +86,8 @@ public class HolonomicDriveBot extends TunableLinearOpMode {
             }
         }
     };
+
+    public HolonomicDriveBot(){}
 
     public void initDriveOp(){
         telemetry.addData("Status", "Initialized");
@@ -152,17 +154,4 @@ public class HolonomicDriveBot extends TunableLinearOpMode {
         telemetry.update();
     }
 
-
-    @Override
-    public void runOpMode() {
-        initDriveOp();
-
-        // Wait for the game to start (driver presses PLAY)
-        waitForStart();
-
-        // run until the end of the match (driver presses STOP)
-        while (opModeIsActive()) {
-            executeControllerDriveLogic();
-        }
-    }
 }
