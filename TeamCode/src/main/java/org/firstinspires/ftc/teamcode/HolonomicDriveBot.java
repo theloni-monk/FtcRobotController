@@ -52,10 +52,10 @@ public class HolonomicDriveBot extends TunableLinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotorImplEx r1 = null;
-    private DcMotorImplEx r2 = null;
-    private DcMotorImplEx l1 = null;
-    private DcMotorImplEx l2 = null;
+    protected DcMotorImplEx r1 = null;
+    protected DcMotorImplEx r2 = null;
+    protected DcMotorImplEx l1 = null;
+    protected DcMotorImplEx l2 = null;
 
     protected double leftAngVel = 0;
     protected double rightAngVel = 0;
