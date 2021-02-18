@@ -64,7 +64,11 @@ public class HolonomicDriveBot extends TunableLinearOpMode {
 
     public final double MAX_RPM = 6000; //free speed rpm
     public final double GEAR_RATIO = 20; // 20:1 reduction
-    public final double WHEEL_RAD = 0.0375; //meters
+    public final double WHEEL_RAD = 37.5; //MM
+    public final double     COUNTS_PER_MOTOR_REV    = 28;
+    public final double     COUNTS_PER_MM         = (COUNTS_PER_MOTOR_REV * GEAR_RATIO) /
+            (WHEEL_RAD * 2 * 3.1415);
+
 
     private final double MAX_RAD_PER_SEC = MAX_RPM / 60 / GEAR_RATIO * 2 * Math.PI;
     private final double MAX_VEL_LIN  = MAX_RAD_PER_SEC * (WHEEL_RAD*WHEEL_RAD) ; //meters/sec  V = w * r^2 get linear vel by taking angular vel (rpm in rads) * r^2

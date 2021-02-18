@@ -2,12 +2,16 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.BNO055IMUImpl;
+import com.qualcomm.robotcore.hardware.DcMotorImplEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.robot.Robot;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.qualcomm.robotcore.util.ThreadPool;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.NavUtil;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
@@ -19,6 +23,7 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.ZYX;
 import static org.firstinspires.ftc.robotcore.external.navigation.NavUtil.plus;
 
 //TODO make actually smart with kalman filter
@@ -66,32 +71,36 @@ public class RobotNavigation {
             }
     }
 
-    static class SmartIntegrator implements BNO055IMU.AccelerationIntegrator {
+    class SmartIntegrator implements BNO055IMU.AccelerationIntegrator {
         BNO055IMU.Parameters parameters = null;
         Position position = new Position();
         Velocity velocity = new Velocity();
         Acceleration acceleration = null;
 
         Date date;
-        long timeLastCorrected;
+        //long timeLastCorrected;
         final double angleEpsilon = 3;//degrees
         final double maxDistRange = 65535; //millimeters
-        private DistanceSensor sideRange;
-        private DistanceSensor frontRange;
+
+        DcMotorImplEx lDrive;
+        int lDrivePrevCount;
+        DcMotorImplEx rDrive;
+        int rDrivePrevCount;
+        //private DistanceSensor sideRange;
+        //private DistanceSensor frontRange;
+        double COUNTS_PER_MOTOR_REV;
+
         //FIXME: use motor params and use encoders to estimate pos
-        SmartIntegrator(DistanceSensor fRange, DistanceSensor sRange) {
+        SmartIntegrator(DcMotorImplEx lDrive, DcMotorImplEx rDrive, double counts_per_motor_rev) {
             date = new Date();
-            frontRange = fRange;
-            sideRange = sRange;
+            this.lDrive = lDrive;
+            this.rDrive = rDrive;
+            COUNTS_PER_MOTOR_REV = counts_per_motor_rev;
         }
 
-        /**
+        /** range correction - deprecated
          * Corrects the internal position variable from range sensors using knowledge of field dimensions and orientation
          * also corrects internal velocity if time between calls is small enough
-         * TODO: write in fudge factors for location of range sensors on robot
-         *
-         * @param angles
-         */
         public void correctFromRangeSensors(Orientation angles) {
             //Orientation angles = BNO055IMUImpl.this //TODO: fuck me
             //TODO: implement this outside of rev api
@@ -129,6 +138,8 @@ public class RobotNavigation {
             return;
         }
 
+         */
+
 
         public Position getPosition() {
             return this.position;
@@ -152,6 +163,23 @@ public class RobotNavigation {
         //TODO: use encoders
         public void update(Acceleration linearAcceleration) {
             //Naive integration
+            int lCount = lDrive.getCurrentPosition();
+            int lDiff = lCount - lDrivePrevCount;
+            lDrivePrevCount = lCount;
+
+            int rCount = rDrive.getCurrentPosition();
+            int rDiff = rCount - rDrivePrevCount;
+            rDrivePrevCount = rCount;
+
+            double meanDiffMM = (rDiff*COUNTS_PER_MOTOR_REV + (lDiff * COUNTS_PER_MOTOR_REV))/2;
+            //TODO: improve maybe and test
+            double xyAngle = RobotNavigation.this.imu.getAngularOrientation(AxesReference.INTRINSIC, ZYX, AngleUnit.RADIANS).firstAngle;
+            double diffAngle = Math.atan() //angle of normal to vector between yldiff and yrdiff;
+            double newXDelta = Math.cos(xyAngle) * meanDiffMM;
+            double newYDelta = Math.sin(xyAngle) * meanDiffMM;
+            Position encoderCorrection = new Position(DistanceUnit.MM, newXDelta, newYDelta, this.position.z, 0);
+
+            Position imuCorrection = new Position();
             if (linearAcceleration.acquisitionTime != 0L) {
                 if (this.acceleration != null) {
                     Acceleration accelPrev = this.acceleration;
@@ -161,19 +189,17 @@ public class RobotNavigation {
                         Velocity deltaVelocity = NavUtil.meanIntegrate(this.acceleration, accelPrev);
                         this.velocity = plus(this.velocity, deltaVelocity);
                     }
-
                     if (velocityPrev.acquisitionTime != 0L) {
-                        Position deltaPosition = NavUtil.meanIntegrate(this.velocity, velocityPrev);
-                        this.position = plus(this.position, deltaPosition);
+                        imuCorrection = NavUtil.meanIntegrate(this.velocity, velocityPrev);
                     }
 
-                    if (this.parameters != null && this.parameters.loggingEnabled) {
-                        RobotLog.vv(this.parameters.loggingTag, "dt=%.3fs accel=%s vel=%s pos=%s", (double) (this.acceleration.acquisitionTime - accelPrev.acquisitionTime) * 1.0E-9D, this.acceleration, this.velocity, this.position);
-                    }
                 } else {
                     this.acceleration = linearAcceleration;
                 }
             }
+            //get new correction from weighted avg
+
+            this.position = plus(this.position);
         }
 
 
@@ -196,11 +222,6 @@ public class RobotNavigation {
             try {
 
                 while(!Thread.currentThread().isInterrupted()) {
-                    //correct from range sensors every 5 update cycles bc acc = 100hz, range = 20hz
-                    correctionCounter += 1;
-                    correctionCounter %= 5;
-                    if(correctionCounter == 0) RobotNavigation.this.integrator.correctFromRangeSensors(RobotNavigation.this.imu.getAngularOrientation());
-
 
                     Acceleration linearAcceleration = RobotNavigation.this.imu.getLinearAcceleration();
                     RobotNavigation.this.integrator.update(linearAcceleration);
