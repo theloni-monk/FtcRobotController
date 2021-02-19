@@ -100,6 +100,10 @@ public class RobotNavigation {
             this.lDrive = lDrive;
             this.rDrive = rDrive;
             COUNTS_PER_MOTOR_REV = counts_per_motor_rev;
+
+            this.position = new Position();
+            this.velocity = new Velocity();
+            this.acceleration = new Acceleration();
         }
 
         /** range correction - deprecated
