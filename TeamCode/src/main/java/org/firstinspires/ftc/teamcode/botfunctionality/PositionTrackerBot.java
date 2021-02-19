@@ -53,15 +53,20 @@ abstract public class PositionTrackerBot extends HolonomicDriveBot {
         imu.initialize(parameters);
 
 
-
         frontRangeSensor = hardwareMap.get(DistanceSensor.class, "range_front");
         sideRangeSensor = hardwareMap.get(DistanceSensor.class, "range_side");
+
+
         RobotNavigation dummyNav = new RobotNavigation();
         rNav = new RobotNavigation(imu, dummyNav.makeIntegrator(l1,r1,COUNTS_PER_MOTOR_REV));
         rNav.startTracking(200, parameters, new Position(), new Velocity()); // start is origin, 5hz update just for testing
 
     }
 
+    public void initPosTrackerBot(){
+        initDriveOp();
+        initTracking();
+    }
     protected void composeTelemetry() {
         // At the beginning of each telemetry update, grab a bunch of data
         // from the IMU that we will then display in separate lines.
@@ -74,18 +79,6 @@ abstract public class PositionTrackerBot extends HolonomicDriveBot {
             //gravity  = imu.getGravity();
         }
         });
-
-//        telemetry.addLine()
-//                .addData("status: ", new Func<String>() {
-//                    @Override public String value() {
-//                        return imu.getSystemStatus().toShortString();
-//                    }
-//                })
-//                .addData("calib: ", new Func<String>() {
-//                    @Override public String value() {
-//                        return imu.getCalibrationStatus().toString();
-//                    }
-//                });
 
         //telemetry.addLine().addData("Motors", "Speeds: left (%.2f)m/s, right (%.2f)m/s", 2 * this.leftAngVel * (WHEEL_RAD * WHEEL_RAD), 2 * this.rightAngVel * (WHEEL_RAD * WHEEL_RAD));
         telemetry.addLine().addData("position: ", new Func<String>() {

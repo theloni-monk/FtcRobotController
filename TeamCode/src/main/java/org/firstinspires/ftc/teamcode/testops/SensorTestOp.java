@@ -56,8 +56,7 @@ public class SensorTestOp extends PositionTrackerBot {
 
     @Override
     public void runOpMode() {
-        initDriveOp();
-        initTracking();
+        initPosTrackerBot();
         composeTelemetry();
         // Wait for the game to start (driver presses PLAY)
         waitForStart();

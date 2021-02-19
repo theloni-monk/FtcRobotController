@@ -5,7 +5,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.NavUtil;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.teamcode.botfunctionality.PositionTrackerBot;
 import org.firstinspires.ftc.teamcode.utils.PIDController;
 
@@ -25,7 +27,7 @@ abstract public class AutoBot extends PositionTrackerBot {
     protected void initPIDs(){
         pidRotate = new PIDController(.003, .00003, 0);
         straightDrivePID = new PIDController(.05, 0, 0);
-        distanceDrivePID = new PIDController(getDouble("P"),getDouble("I"),getDouble("D"));//TODO: tune
+        distanceDrivePID = new PIDController(0.5,0,0.2);//getDouble("P"),getDouble("I"),getDouble("D"));//TODO: tune
     }
 
     public void initAutoBot(){
@@ -39,7 +41,7 @@ abstract public class AutoBot extends PositionTrackerBot {
         super.composeTelemetry();
         telemetry.addLine().addData("PID Vals",new Func<String>() {
             @Override public String value() {
-                return "P: %s, I: %s, D: %s".format(String.valueOf(getDouble("P")),String.valueOf(getDouble("I")),String.valueOf(getDouble("D")));
+                return "P: %s, I: %s, D: %s".format(String.valueOf(distanceDrivePID.getP()),String.valueOf(distanceDrivePID.getI()),String.valueOf(distanceDrivePID.getD()));
             }
         });
     }
@@ -51,21 +53,8 @@ abstract public class AutoBot extends PositionTrackerBot {
      */
     protected void driveDist(double dist, DistanceUnit unit) {
 
-//        if (dist > 0) {
-//            runLeftMotorPow(1);
-//            runRightMotorPow(1);
-//            sleep((long) ((dist / 1.23) * 1000));
-//        } else {
-////            runLeftMotorPow(-1);
-////            runRightMotorPow(-1);
-////            sleep((long) ((-dist / 1.23) * 1000));
-//            rotate(180, 1);
-//            driveDist(-dist, unit);
-//        }
-//        return;
-
-        double initLoc = this.rNav.getPosition().toUnit(unit).y;
-
+        Position initLoc = this.rNav.getPosition().toUnit(unit);
+        resetAngle();
         straightDrivePID.setSetpoint(0);
         straightDrivePID.setOutputRange(0, angleCorrectionPow);
         straightDrivePID.setInputRange(-90, 90);
@@ -73,9 +62,9 @@ abstract public class AutoBot extends PositionTrackerBot {
 
         // Use PID with position integrator to drive a distance
         distanceDrivePID.reset();
-        distanceDrivePID.setPID(getDouble("P"),getDouble("I"),getDouble("D"));
-        distanceDrivePID.setSetpoint(initLoc + dist);
-        distanceDrivePID.setInputRange(initLoc, initLoc + dist + 0.25);
+        //distanceDrivePID.setPID(getDouble("P"),getDouble("I"),getDouble("D"));
+        distanceDrivePID.setSetpoint(dist);
+        distanceDrivePID.setInputRange(0, dist);
         distanceDrivePID.setOutputRange(-1, 1);
         distanceDrivePID.setTolerance(5);
         distanceDrivePID.enable();
@@ -85,8 +74,9 @@ abstract public class AutoBot extends PositionTrackerBot {
             // Use PID with imu input to drive in a straight line.
             angleCorrection = straightDrivePID.performPID(getAngle());
 
-            double yLoc = this.rNav.getPosition().toUnit(unit).y;
-            distanceCorrection = distanceDrivePID.performPID(yLoc); // TODO: make it an arbitrary distance vector
+            Position displacementVect = NavUtil.minus(initLoc,this.rNav.getPosition().toUnit(unit));
+            double displacementMag = Math.sqrt(displacementVect.x*displacementVect.x + (displacementVect.y * displacementVect.y) + (displacementVect.z * displacementVect.z));
+            distanceCorrection = distanceDrivePID.performPID(displacementMag);
 
             // set power levels.
             runLeftMotorPow(distanceCorrection - angleCorrection);
@@ -100,6 +90,17 @@ abstract public class AutoBot extends PositionTrackerBot {
         runRightMotorPow(0);
     }
 
+    protected void driveTo(Position toPos){
+        Position displacementVect = NavUtil.minus(this.rNav.getPosition().toUnit(toPos.unit), toPos);
+        double displacementMag = Math.sqrt(displacementVect.x*displacementVect.x + (displacementVect.y * displacementVect.y) + (displacementVect.z * displacementVect.z));
+        double radAngle = Math.atan2(displacementVect.y, displacementVect.x);
+        rotate((int) AngleUnit.DEGREES.fromRadians(radAngle), 1);
+        driveDist(displacementMag, toPos.unit);
+    }
+
+
+
+    //TODO: WRITEME absolute rotation
     /**
      * Rotate left or right the number of degrees. Does not support turning more than 359 degrees.
      * @param degrees Degrees to turn, + is left - is right

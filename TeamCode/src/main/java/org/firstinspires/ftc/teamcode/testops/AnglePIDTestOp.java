@@ -16,9 +16,7 @@ public class AnglePIDTestOp extends AutoBot {
 
     @Override
     public void runOpMode() {
-        initDriveOp();
-        initTracking();
-        initPIDs();
+        initAutoBot();
         // Set up our telemetry dashboard
         composeTelemetry();
         // Wait for the game to start (driver presses PLAY)

@@ -47,7 +47,7 @@ import java.util.TimerTask;
 /**
  * Emulates POV driving for holonomic drivetrain
  */
-abstract public class HolonomicDriveBot extends TunableLinearOpMode {
+abstract public class HolonomicDriveBot extends LinearOpMode{ //TunableLinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();

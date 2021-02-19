@@ -38,19 +38,18 @@ public class RobotNavigation {
         this.navManager = ThreadPool.newSingleThreadExecutor("imu integration");
     }
     public RobotNavigation(){
-
     }
 
     public Position getPosition() {
-        return this.integrator.getPosition();
+        return this.integrator.getPosition()!=null?this.integrator.getPosition():new Position();
     }
 
     public Velocity getVelocity() {
-        return this.integrator.getVelocity();
+        return this.integrator.getVelocity()!=null?this.integrator.getVelocity():new Velocity();
     }
 
     public Acceleration getAcceleration() {
-        return this.integrator.getAcceleration();
+        return this.integrator.getAcceleration()!=null?this.integrator.getAcceleration():new Acceleration();
     }
 
     /**
@@ -105,48 +104,6 @@ public class RobotNavigation {
             this.velocity = new Velocity();
             this.acceleration = new Acceleration();
         }
-
-        /** range correction - deprecated
-         * Corrects the internal position variable from range sensors using knowledge of field dimensions and orientation
-         * also corrects internal velocity if time between calls is small enough
-        public void correctFromRangeSensors(Orientation angles) {
-            //Orientation angles = BNO055IMUImpl.this //TODO: fuck me
-            //TODO: implement this outside of rev api
-            long timeDelta = date.getTime() - timeLastCorrected;
-            Position prevPos = this.position;
-
-            double sideDist = sideRange.getDistance(DistanceUnit.MM);
-            double frontDist = frontRange.getDistance(DistanceUnit.MM);
-            double theta = angles.firstAngle; // heading
-
-            //WRITEME: find wall config based on orientation then calculate position from trig relative to wall
-            if (frontDist < maxDistRange) {
-                //141inch long field
-                if (withinEpsilon(theta, 0)) {
-                    this.position.y = 3581.4 - (frontDist );
-                }
-                if (withinEpsilon(theta, 180) || withinEpsilon(theta, -180)) {
-                    this.position.y = frontDist ;
-                }
-            }
-            if (sideDist < maxDistRange) {
-                if (withinEpsilon(theta, 0)) {
-                    this.position.x = 3581.4 - (sideDist );
-                }
-                if (withinEpsilon(theta, 180) || withinEpsilon(theta, -180)) {
-                    this.position.x = sideDist ;
-                }
-            }
-
-//            if (timeDelta < 10) { //update vel from pos derivative if delta t is dt
-//                this.velocity.xVeloc = (this.position.x - prevPos.x) / (timeDelta / 1000);
-//                this.velocity.yVeloc = (this.position.y - prevPos.y) / (timeDelta / 1000);
-//            }
-
-            return;
-        }
-
-         */
 
 
         public Position getPosition() {
