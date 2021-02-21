@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.botfunctionality.AutoBot;
 import org.firstinspires.ftc.teamcode.botfunctionality.PositionTrackerBot;
 import org.firstinspires.ftc.teamcode.utils.PIDController;
 
-@TeleOp(name="Angle PID Test", group="Linear Opmode")
+@TeleOp(name="Angle PID Test", group="Tests")
 public class AnglePIDTestOp extends AutoBot {
 
 

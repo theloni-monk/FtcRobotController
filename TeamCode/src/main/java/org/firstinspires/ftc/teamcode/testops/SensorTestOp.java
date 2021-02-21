@@ -50,7 +50,7 @@ import org.firstinspires.ftc.teamcode.botfunctionality.PositionTrackerBot;
 import java.util.Locale;
 
 
-@TeleOp(name="Sensor and Navigation Test", group="Linear Opmode")
+@TeleOp(name="Sensor and Navigation Test", group="Tests")
 //@Disabled
 public class SensorTestOp extends PositionTrackerBot {
 

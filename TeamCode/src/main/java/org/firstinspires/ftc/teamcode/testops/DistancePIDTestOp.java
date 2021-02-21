@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.botfunctionality.AutoBot;
 
-@TeleOp(name="Distance PID Test", group="Linear Opmode")
+@TeleOp(name="Distance PID Test", group="Tests")
 public class DistancePIDTestOp extends AutoBot {
 
     @Override

@@ -29,6 +29,7 @@
 
 package org.firstinspires.ftc.teamcode.testops;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -39,8 +40,8 @@ import com.qualcomm.robotcore.util.Range;
 import java.util.TimerTask;
 
 
-@TeleOp(name="Shooter Test Script - kitbot config", group="Linear Opmode")
-//@Disabled
+@TeleOp(name="Shooter Test Script - kitbot config", group="Tests")
+@Disabled
 public class ShooterTestOp extends LinearOpMode {
 
     // Declare OpMode members.

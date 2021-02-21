@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.ServoImplEx;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.botfunctionality.AutoBot;
 
-@Autonomous(name = "Shoot disks", group = "Linear Opmode")
+@Autonomous(name = "Shoot disks", group = "Auto")
 public class ShootDisksOp extends AutoBot {
     private DcMotor lShooter = null;
     private DcMotor rShooter = null;

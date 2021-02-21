@@ -36,7 +36,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.botfunctionality.HolonomicDriveBot;
 
 
-@TeleOp(name="DUMMYTEST", group="Linear Opmode")
+@TeleOp(name="DUMMYTEST", group="Tests")
 //@Disabled
 public class DummyTest extends LinearOpMode {
 

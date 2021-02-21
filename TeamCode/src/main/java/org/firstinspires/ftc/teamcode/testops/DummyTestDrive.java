@@ -35,7 +35,7 @@ import org.firstinspires.ftc.teamcode.botfunctionality.HolonomicDriveBot;
 import org.firstinspires.ftc.teamcode.botfunctionality.PositionTrackerBot;
 
 
-@TeleOp(name="DUMMYTEST_DRIVE", group="Linear Opmode")
+@TeleOp(name="DUMMYTEST_DRIVE", group="Tests")
 //@Disabled
 public class DummyTestDrive extends HolonomicDriveBot {
 

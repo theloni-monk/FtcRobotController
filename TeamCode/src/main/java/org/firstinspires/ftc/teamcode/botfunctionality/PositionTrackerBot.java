@@ -66,6 +66,7 @@ abstract public class PositionTrackerBot extends HolonomicDriveBot {
         initDriveOp();
         initTracking();
     }
+
     protected void composeTelemetry() {
         // At the beginning of each telemetry update, grab a bunch of data
         // from the IMU that we will then display in separate lines.
