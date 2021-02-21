@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.utils;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotorImplEx;
-import com.qualcomm.robotcore.robot.Robot;
 import com.qualcomm.robotcore.util.ThreadPool;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
@@ -30,11 +29,10 @@ public class RobotNavigation {
 
     /**
      * @param bno: must be already initialized
-     * @param smartIntegrator
      */
-    public RobotNavigation(BNO055IMU bno, SmartIntegrator smartIntegrator){
+    public RobotNavigation(BNO055IMU bno, DcMotorImplEx l1, DcMotorImplEx r1, double count_per_mm){
         this.imu = bno;
-        this.integrator = smartIntegrator;
+        this.integrator = new SmartIntegrator(l1,r1,count_per_mm);
         this.navManager = ThreadPool.newSingleThreadExecutor("imu integration");
     }
     public RobotNavigation(){
@@ -90,15 +88,15 @@ public class RobotNavigation {
         int rDrivePrevCount;
         //private DistanceSensor sideRange;
         //private DistanceSensor frontRange;
-        double COUNTS_PER_MOTOR_REV;
+        double COUNTS_PER_MM;
         final double imuWeight = 0.05;
 
         //FIXME: use motor params and use encoders to estimate pos
-        SmartIntegrator(DcMotorImplEx lDrive, DcMotorImplEx rDrive, double counts_per_motor_rev) {
+        SmartIntegrator(DcMotorImplEx lDrive, DcMotorImplEx rDrive, double counts_per_mm) {
             date = new Date();
             this.lDrive = lDrive;
             this.rDrive = rDrive;
-            COUNTS_PER_MOTOR_REV = counts_per_motor_rev;
+            COUNTS_PER_MM = counts_per_mm;
 
             this.position = new Position();
             this.velocity = new Velocity();
@@ -126,7 +124,7 @@ public class RobotNavigation {
         }
 
         public void update(Acceleration linearAcceleration) {
-            //Naive integration
+
             int lCount = lDrive.getCurrentPosition();
             int lDiff = lCount - lDrivePrevCount;
             lDrivePrevCount = lCount;
@@ -135,34 +133,35 @@ public class RobotNavigation {
             int rDiff = rCount - rDrivePrevCount;
             rDrivePrevCount = rCount;
 
-            double meanDiffMM = (rDiff*COUNTS_PER_MOTOR_REV + (lDiff * COUNTS_PER_MOTOR_REV))/2;
+            double meanDiffMM = (rDiff* COUNTS_PER_MM + (lDiff * COUNTS_PER_MM))/2;
             double xyAngle = RobotNavigation.this.imu.getAngularOrientation(AxesReference.INTRINSIC, ZYX, AngleUnit.RADIANS).firstAngle;
             //double diffAngle = Math.atan() //TODO: WRITEME: angle of normal to vector between yldiff and yrdiff;
             double newXDelta = Math.cos(xyAngle) * meanDiffMM;
             double newYDelta = Math.sin(xyAngle) * meanDiffMM;
-            Position encoderCorrection = new Position(DistanceUnit.MM, newXDelta, newYDelta, this.position.z, 0);
+            Position encoderCorrection = new Position(DistanceUnit.MM, newXDelta, newYDelta, 0, 0);
 
-            Position imuCorrection = new Position();
-            if (linearAcceleration.acquisitionTime != 0L) {
-                if (this.acceleration != null) {
-                    Acceleration accelPrev = this.acceleration;
-                    Velocity velocityPrev = this.velocity;
-                    this.acceleration = linearAcceleration;
-                    if (accelPrev.acquisitionTime != 0L) {
-                        Velocity deltaVelocity = NavUtil.meanIntegrate(this.acceleration, accelPrev);
-                        this.velocity = NavUtil.plus(this.velocity, deltaVelocity);
-                    }
-                    if (velocityPrev.acquisitionTime != 0L) {
-                        imuCorrection = NavUtil.meanIntegrate(this.velocity, velocityPrev);
-                    }
-
-                } else {
-                    this.acceleration = linearAcceleration;
-                }
-            }
+//            Position imuCorrection = new Position();
+//            if (linearAcceleration.acquisitionTime != 0L) {
+//                if (this.acceleration != null) {
+//                    Acceleration accelPrev = this.acceleration;
+//                    Velocity velocityPrev = this.velocity;
+//                    this.acceleration = linearAcceleration;
+//                    if (accelPrev.acquisitionTime != 0L) {
+//                        Velocity deltaVelocity = NavUtil.meanIntegrate(this.acceleration, accelPrev);
+//                        this.velocity = NavUtil.plus(this.velocity, deltaVelocity);
+//                    }
+//                    if (velocityPrev.acquisitionTime != 0L) {
+//                        imuCorrection = NavUtil.meanIntegrate(this.velocity, velocityPrev);
+//                    }
+//
+//                } else {
+//                    this.acceleration = linearAcceleration;
+//                }
+//            }
             //get new correction from weighted avg
-            Position posDelta = plus(scale(encoderCorrection, 1 - imuWeight),scale(imuCorrection, imuWeight));
-            this.position = NavUtil.plus(this.position, posDelta);
+            //Position posDelta = plus(scale(encoderCorrection, 1 - imuWeight),scale(imuCorrection, imuWeight));
+            this.position = NavUtil.plus(this.position, encoderCorrection);//posDelta);
+            this.position.z = 0;
         }
 
 

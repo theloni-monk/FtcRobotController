@@ -57,9 +57,8 @@ abstract public class PositionTrackerBot extends HolonomicDriveBot {
         sideRangeSensor = hardwareMap.get(DistanceSensor.class, "range_side");
 
 
-        RobotNavigation dummyNav = new RobotNavigation();
-        rNav = new RobotNavigation(imu, dummyNav.makeIntegrator(l1,r1,COUNTS_PER_MOTOR_REV));
-        rNav.startTracking(200, parameters, new Position(), new Velocity()); // start is origin, 5hz update just for testing
+        rNav = new RobotNavigation(imu, l1, r1, COUNTS_PER_MM);
+        rNav.startTracking(50, parameters, new Position(), new Velocity()); // start is origin, 5hz update just for testing
 
     }
 
