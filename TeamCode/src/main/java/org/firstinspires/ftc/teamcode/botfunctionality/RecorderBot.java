@@ -1,22 +1,15 @@
 package org.firstinspires.ftc.teamcode.botfunctionality;
 
-import android.content.Context;
-import android.content.ContextWrapper;
-import android.util.Base64;
-
+import com.google.gson.Gson;
 import com.qualcomm.robotcore.util.RobotLog;
-import com.thoughtworks.xstream.core.util.Base64Encoder;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.util.HashMap;
+import java.util.TreeMap;
 
 public abstract class RecorderBot extends HolonomicDriveBot{
     ObjectOutputStream objOutStream;
-    HashMap<Long, String> outputMap;
+    TreeMap<Long, String> outputMap;
+    Gson gson;
 
     double prevVelL;
     double prevVelR;
@@ -28,8 +21,8 @@ public abstract class RecorderBot extends HolonomicDriveBot{
     }
 
     public void initMap(){
-        outputMap = new HashMap<>();
-
+        outputMap = new TreeMap<>();
+        gson = new Gson();
 
     }
 
@@ -41,28 +34,20 @@ public abstract class RecorderBot extends HolonomicDriveBot{
     protected void executeRecorderLogic(){
         if(initTime == 0) { initTime = System.currentTimeMillis();}
         if(prevVelL != this.leftAngVel || prevVelR != this.rightAngVel){
-            outputMap.put(System.currentTimeMillis() - initTime, this.leftAngVel+","+ this.rightAngVel);
+            long currTime = System.currentTimeMillis() - initTime;
+            RobotLog.vv("recording: ", currTime+": "+this.leftAngVel+","+ this.rightAngVel);
+            outputMap.put(currTime, this.leftAngVel+","+ this.rightAngVel);
+            RobotLog.vv("growing map: ", outputMap.toString());
         }
     }
 
     protected void saveFile(){
-        try{
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            objOutStream = new ObjectOutputStream(bos);
-            objOutStream.writeObject(outputMap);
-            objOutStream.flush();
-            objOutStream.close();
-
-            byte[] data = bos.toByteArray();
-            Base64Encoder encoder = new Base64Encoder();
-            String bs64 = encoder.encode(data);
+            outputMap.put(System.currentTimeMillis() - initTime, "0,0");
             RobotLog.vv("Map",outputMap.toString());
             RobotLog.vv("s", "\n\n\n");
-            RobotLog.vv("Wobble", bs64);
+            RobotLog.vv("Wobble", gson.toJson(outputMap));
             RobotLog.vv("s","\n\n\n");
-        }catch(IOException e){
 
-        }
     }
 
 }
