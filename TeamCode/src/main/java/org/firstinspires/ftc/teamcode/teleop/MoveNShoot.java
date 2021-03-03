@@ -4,11 +4,10 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
-import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.teamcode.botfunctionality.HolonomicDriveBot;
+import org.firstinspires.ftc.teamcode.botfunctionality.AutoBot;
 @TeleOp (name="Move and Shoot", group="Performing")
-public class MoveNShoot extends HolonomicDriveBot {
+public class MoveNShoot extends AutoBot {
 
 
     private DcMotor lShooter = null;
@@ -35,7 +34,7 @@ public class MoveNShoot extends HolonomicDriveBot {
             executeControllerDriveLogic();
             if(gamepad1.a && debounced) {spinMotors = !spinMotors; debounce.run();};
             if(gamepad1.y && debounced) {lServo.setPosition(1); debounce.run();}
-            if(gamepad1.x && debounced) {lServo.setPosition(0); debounce.run();}
+            if(gamepad1.x && debounced) {lServo.setPosition(0.5); debounce.run();}
 
              // Send calculated power to wheels
             if(spinMotors) {

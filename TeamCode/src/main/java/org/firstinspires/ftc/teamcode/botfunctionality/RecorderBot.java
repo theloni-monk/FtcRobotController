@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.botfunctionality;
 import android.util.Size;
 
 import com.google.gson.Gson;
+import com.qualcomm.robotcore.robot.Robot;
 import com.qualcomm.robotcore.util.RobotLog;
 
 import java.io.ObjectOutputStream;
@@ -37,7 +38,7 @@ public abstract class RecorderBot extends HolonomicDriveBot{
         if(prevVelL != this.leftAngVel || prevVelR != this.rightAngVel){
             long currTime = System.currentTimeMillis() - initTime;
             RobotLog.vv("Currently recording: ", currTime+": "+this.leftAngVel+","+ this.rightAngVel+"; TreeMap keys len: " +  outputMap.keySet().size());
-            RobotLog.vv("Free memory remaining", String.valueOf(Runtime.getRuntime().freeMemory()));
+            //RobotLog.vv("Free memory remaining", String.valueOf(Runtime.getRuntime().freeMemory()));
             outputMap.put(currTime, this.leftAngVel+","+ this.rightAngVel);
             this.prevVelL = this.leftAngVel;
             this.prevVelR = this.rightAngVel;
@@ -49,11 +50,17 @@ public abstract class RecorderBot extends HolonomicDriveBot{
             outputMap.put(System.currentTimeMillis() - initTime, "0,0");
             RobotLog.vv("Map",outputMap.toString());
             System.out.flush();
-            RobotLog.vv("s", "\n\n\n");
-            RobotLog.vv("Wobble", gson.toJson(outputMap));
+            String jstr = gson.toJson(outputMap);
+            RobotLog.vv("truncated map", jstr);
+            logMapJson(jstr);
             System.out.flush();
-            RobotLog.vv("s","\n\n\n");
 
+    }
+
+    void logMapJson(String json){
+        for(String s: json.split(",\"")){
+            RobotLog.vv("jsondata", ",\""+s);
+        }
     }
 
 }
