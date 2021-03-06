@@ -27,7 +27,7 @@ abstract public class PositionTrackerBot extends HolonomicDriveBot {
     private DistanceSensor frontRangeSensor;
     private DistanceSensor sideRangeSensor;
 
-    RobotNavigation rNav;
+    protected RobotNavigation rNav;
 
     // State used for updating telemetry
     Orientation angles;

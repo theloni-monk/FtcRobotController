@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.utils;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotorImplEx;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.util.ThreadPool;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
@@ -87,7 +88,9 @@ public class RobotNavigation {
         DcMotorImplEx rDrive;
         int rDrivePrevCount;
         //private DistanceSensor sideRange;
-        //private DistanceSensor frontRange;
+
+        private DistanceSensor frontRange;
+
         double COUNTS_PER_MM;
         final double imuWeight = 0.05;
 
@@ -161,6 +164,7 @@ public class RobotNavigation {
             //get new correction from weighted avg
             //Position posDelta = plus(scale(encoderCorrection, 1 - imuWeight),scale(imuCorrection, imuWeight));
             this.position = NavUtil.plus(this.position, encoderCorrection);//posDelta);
+            this.position.y = Math.sin(xyAngle) * frontRange.getDistance(DistanceUnit.MM); //HACK
             this.position.z = 0;
         }
 
